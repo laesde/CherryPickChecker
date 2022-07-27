@@ -109,30 +109,30 @@ func main() {
 	// Make sure we trust the repo we wanna check
 	runcmd(fmt.Sprintf("git config --global --add safe.directory %s", os.Getenv("REPO_PATH")), true)
 
-	fmt.Printf("Lacze z jira...\n")
+	fmt.Printf("Connecting to Jira...\n")
 	client := connectToJira()
 
 	go searchForTasks(client, jiraTagName, completedTasksChannel)
 	missingCommits := checkMissingCommits(gitBranchName)
 
-	fmt.Printf("Pobieram dane z jiry...\n\n")
+	fmt.Printf("Getting data from Jira...\n\n")
 	completedTasks := <-completedTasksChannel
 
-	fmt.Printf("Ukonczone zadania z Jiry dla tagu %s: \n%s\n\n", jiraTagName, *completedTasks)
-	fmt.Printf("Commity ktorych nie ma na %s: \n%s\n\n", gitBranchName, *missingCommits)
+	fmt.Printf("Finished tasks from Jira for tag %s: \n%s\n\n", jiraTagName, *completedTasks)
+	fmt.Printf("Commits missing from %s: \n%s\n\n", gitBranchName, *missingCommits)
 
 	testSet := make(map[string]bool)
 	for _, e := range *missingCommits {
 
 		if _, prs := testSet[e]; prs {
-			panic("Zduplikowane ID w brakujacych commitach - CO SIE DZIEJE?!?")		
+			panic("Duplicated ID in missing commits - This should not happen")		
 		}
 
 		testSet[e] = true
 	}
 
 	noIssues := true
-	fmt.Printf("Wykrywam brakujace taski dla wersji %s...\n", gitBranchName)
+	fmt.Printf("Detecting missing tasks for version %s...\n", gitBranchName)
 
 	for _, e := range *completedTasks {
 		if _, prs := testSet[e]; prs {
@@ -142,34 +142,34 @@ func main() {
 	}
 
 	if noIssues {
-		fmt.Printf(" Wszystko git <3\n")
+		fmt.Printf(" Everything fine <3\n")
 	} else {
-		panic(" Prosze pomergowac brakujace commity </3")
+		panic(" Please cherry-pick missing commits </3")
 	}
 }
 
 func runcmdIgnoreErrors(cmd string, shell bool) {
-	fmt.Printf("Wolam komende (i ignoruje bledy): %s\n", cmd)
+	fmt.Printf("Calling cmd (and ignoring exceptions): %s\n", cmd)
 
     if shell {
         _, err := exec.Command("bash", "-c", cmd).Output()
 
         if err != nil {
-        	fmt.Printf(" - Blad (ignorowany): %s\n", err)
+        	fmt.Printf(" - Exception (ignored): %s\n", err)
         }
         return
     }
 
     _, err := exec.Command(cmd).Output()
     if err != nil {
-    	fmt.Printf(" - Blad (ignorowany): %s\n", err)
+    	fmt.Printf(" - Exception (ignored): %s\n", err)
     }
 
     return
 }
 
 func runcmd(cmd string, shell bool) []byte {
-	fmt.Printf("Wolam komende: %s\n", cmd)
+	fmt.Printf("Calling cmd: %s\n", cmd)
 
     if shell {
         out, err := exec.Command("bash", "-c", cmd).Output()
