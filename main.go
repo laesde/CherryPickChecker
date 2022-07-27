@@ -125,11 +125,18 @@ func main() {
 		testSet[e] = true
 	}
 
+	noIssues := true
 	fmt.Printf("Wykrywam brakujace taski dla wersji %s...\n", gitBranchName)
+
 	for _, e := range *completedTasks {
 		if _, prs := testSet[e]; prs {
 			fmt.Printf(" ! %s \n", e)
+			noIssues = false
 		}
+	}
+
+	if noIssues {
+		fmt.Printf(" Wszystko git :)\n")
 	}
 }
 
