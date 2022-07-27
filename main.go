@@ -141,6 +141,8 @@ func main() {
 }
 
 func runcmd(cmd string, shell bool) []byte {
+	fmt.Printf("Running command: %s\n", cmd)
+
     if shell {
         out, err := exec.Command("bash", "-c", cmd).Output()
         if err != nil {
