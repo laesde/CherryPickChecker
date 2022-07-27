@@ -109,17 +109,17 @@ func main() {
 	// Make sure we trust the repo we wanna check
 	runcmd(fmt.Sprintf("git config --global --add safe.directory %s", os.Getenv("REPO_PATH")), true)
 
-	fmt.Printf("Connecting to Jira...\n")
+	//fmt.Printf("Connecting to Jira...\n")
 	client := connectToJira()
 
 	go searchForTasks(client, jiraTagName, completedTasksChannel)
 	missingCommits := checkMissingCommits(gitBranchName)
 
-	fmt.Printf("Getting data from Jira...\n\n")
+	//fmt.Printf("Getting data from Jira...\n\n")
 	completedTasks := <-completedTasksChannel
 
-	fmt.Printf("Finished tasks from Jira for tag %s: \n%s\n\n", jiraTagName, *completedTasks)
-	fmt.Printf("Commits missing from %s: \n%s\n\n", gitBranchName, *missingCommits)
+	//fmt.Printf("Finished tasks from Jira for tag %s: \n%s\n\n", jiraTagName, *completedTasks)
+	//fmt.Printf("Commits missing from %s: \n%s\n\n", gitBranchName, *missingCommits)
 
 	testSet := make(map[string]bool)
 	for _, e := range *missingCommits {
@@ -150,32 +150,32 @@ func main() {
 }
 
 func runcmdIgnoreErrors(cmd string, shell bool) {
-	fmt.Printf("Calling cmd (and ignoring exceptions): %s\n", cmd)
+	//fmt.Printf("Calling cmd (and ignoring exceptions): %s\n", cmd)
 
     if shell {
         _, err := exec.Command("bash", "-c", cmd).Output()
 
         if err != nil {
-        	fmt.Printf(" - Exception (ignored): %s\n", err)
+        	//fmt.Printf(" - Exception (ignored): %s\n", err)
         }
         return
     }
 
     _, err := exec.Command(cmd).Output()
     if err != nil {
-    	fmt.Printf(" - Exception (ignored): %s\n", err)
+    	//fmt.Printf(" - Exception (ignored): %s\n", err)
     }
 
     return
 }
 
 func runcmd(cmd string, shell bool) []byte {
-	fmt.Printf("Calling cmd: %s\n", cmd)
+	//fmt.Printf("Calling cmd: %s\n", cmd)
 
     if shell {
         out, err := exec.Command("bash", "-c", cmd).Output()
         if err != nil {
-            log.Fatal(err)
+            //log.Fatal(err)
             panic("some error found")
         }
         return out
@@ -183,7 +183,7 @@ func runcmd(cmd string, shell bool) []byte {
 
     out, err := exec.Command(cmd).Output()
     if err != nil {
-        log.Fatal(err)
+        //log.Fatal(err)
     }
 
     return out
