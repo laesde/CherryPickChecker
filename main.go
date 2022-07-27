@@ -142,7 +142,9 @@ func main() {
 	}
 
 	if noIssues {
-		fmt.Printf(" Wszystko git :)\n")
+		fmt.Printf(" Wszystko git <3\n")
+	} else {
+		panic(" Prosze pomergowac brakujace commity </3")
 	}
 }
 
