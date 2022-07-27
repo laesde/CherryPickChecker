@@ -34,5 +34,5 @@ REPO_PATH="absolutna_lokalizacja_repo"
 JIRA_URL="adres_url"
 MAIN_BRANCH="main_branch_name"
 JIRA_PROJECT_ID="ID projektu na Jirze"
-JQL_QUERY="project = '%s' AND (fixVersion = '%s' OR labels = '%s') and Status = 'RESOLVED' and component = 'Android'"
+JQL_QUERY="project = '%s' AND (fixVersion = '%s' OR labels = '%s') and (Status = 'RESOLVED' OR Status = 'CLOSED') and component = 'Android'"
 ```
