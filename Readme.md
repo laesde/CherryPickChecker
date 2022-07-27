@@ -1,6 +1,6 @@
 # Uruchomienie skryptu
 
-```sudo go run main.go```
+```go run main.go```
 
 # Jira Token
 Aby wygenerowac swoj token wejdz na strone:
