@@ -144,7 +144,8 @@ func main() {
 	if noIssues {
 		fmt.Printf(" Everything fine <3\n")
 	} else {
-		panic(" Please cherry-pick missing commits </3")
+		fmt.Printf("  Please cherry-pick missing commits </3\n")
+		os.Exit(128)
 	}
 }
 
