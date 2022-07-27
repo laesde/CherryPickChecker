@@ -145,7 +145,7 @@ func main() {
 		fmt.Printf(" Everything fine <3\n")
 	} else {
 		fmt.Printf("  Please cherry-pick missing commits </3\n")
-		os.Exit(128)
+		os.Exit(1)
 	}
 }
 
