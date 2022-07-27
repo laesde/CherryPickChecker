@@ -66,9 +66,15 @@ func checkMissingCommits(fxVersion string) (*[]string) {
 	var missingCommitsList []string
 
 	mainBranchName := os.Getenv("MAIN_BRANCH")	
+
+	makeSureBranchFxIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s:%s", os.Getenv("REPO_PATH"), fxVersion, fxVersion)
+	makeSureMainBranchIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s:%s", os.Getenv("REPO_PATH"), mainBranchName, mainBranchName)
 	command := fmt.Sprintf("git -C %s cherry -v %s %s", os.Getenv("REPO_PATH"), fxVersion, mainBranchName)
 
+	runcmdIgnoreErrors(makeSureBranchFxIsThereCommand, true)
+	runcmdIgnoreErrors(makeSureMainBranchIsThereCommand, true)
 	result := runcmd(command, true)
+
 	resultString := bytes.NewBuffer(result).String()
 
 	scanner := bufio.NewScanner(strings.NewReader(resultString))
@@ -140,8 +146,28 @@ func main() {
 	}
 }
 
+func runcmdIgnoreErrors(cmd string, shell bool) {
+	fmt.Printf("Wolam komende (i ignoruje bledy): %s\n", cmd)
+
+    if shell {
+        _, err := exec.Command("bash", "-c", cmd).Output()
+
+        if err != nil {
+        	fmt.Printf(" - Blad (ignorowany): %s\n", err)
+        }
+        return
+    }
+
+    _, err := exec.Command(cmd).Output()
+    if err != nil {
+    	fmt.Printf(" - Blad (ignorowany): %s\n", err)
+    }
+
+    return
+}
+
 func runcmd(cmd string, shell bool) []byte {
-	fmt.Printf("Running command: %s\n", cmd)
+	fmt.Printf("Wolam komende: %s\n", cmd)
 
     if shell {
         out, err := exec.Command("bash", "-c", cmd).Output()
