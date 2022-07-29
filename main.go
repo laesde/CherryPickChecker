@@ -62,28 +62,21 @@ func searchForTasks(client *jira.Client, fixVersion string, result chan *[]strin
 		fmt.Sprintf(os.Getenv("JQL_QUERY"), os.Getenv("JIRA_PROJECT_ID"), fixVersion, strings.ReplaceAll(fixVersion, " ", "_")))
 }
 
-func checkMissingCommits(fxVersion string) (*[]string) {
+// returns set of ticket that headBranch has but upstreamBranch doesn't
+func diffJiraTicketsBetween(upstreamBranch string, headBranch string) (*[]string) {
 	var missingCommitsList []string
 
-	mainBranchName := os.Getenv("MAIN_BRANCH")	
-
-	makeSureBranchFxIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s:%s", os.Getenv("REPO_PATH"), fxVersion, fxVersion)
-	makeSureMainBranchIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s:%s", os.Getenv("REPO_PATH"), mainBranchName, mainBranchName)
-	command := fmt.Sprintf("git -C %s cherry -v %s %s", os.Getenv("REPO_PATH"), fxVersion, mainBranchName)
-
-	runcmdIgnoreErrors(makeSureBranchFxIsThereCommand, true)
-	runcmdIgnoreErrors(makeSureMainBranchIsThereCommand, true)
+	command := fmt.Sprintf("git -C %s log  --format='%s' %s..%s", os.Getenv("REPO_PATH"), "%s", upstreamBranch, headBranch)
 	result := runcmd(command, true)
 
 	resultString := bytes.NewBuffer(result).String()
-
 	scanner := bufio.NewScanner(strings.NewReader(resultString))
 	for scanner.Scan() {
 		line := scanner.Text()
 		fields := strings.Fields(line)
 
-		if strings.HasPrefix(fields[0], "+") && strings.HasPrefix(fields[2], "SOL-") {
-			taskId := strings.Split(fields[2], "_")[0]
+		if strings.HasPrefix(fields[0], "SOL-") {
+			taskId := strings.Split(fields[0], "_")[0]
 			explodedTaskId := strings.Split(taskId, "-")
 
 			missingCommitsList = append(
@@ -95,25 +88,58 @@ func checkMissingCommits(fxVersion string) (*[]string) {
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
-
 	return &missingCommitsList
 }
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
+func prepareSources(sources [2]string) {
+	for _, source := range sources {
+		makeSureMainBranchIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s:%s", os.Getenv("REPO_PATH"), source, source)
+		runcmdIgnoreErrors(makeSureMainBranchIsThereCommand, true)
+	}
+}
+
+func checkMissingCommits(fxVersion string, mainBranchName string) (*[]string) {
+	missingCommitOnFxBranch := diffJiraTicketsBetween(fxVersion, mainBranchName)
+	missingCommitsOnMainBranch := diffJiraTicketsBetween(mainBranchName, fxVersion)
+	result := []string{}
+    for _, v := range *missingCommitOnFxBranch {
+		// remove false positives
+		if contains(*missingCommitsOnMainBranch, v) == false {
+			result = append(result, v)	
+		}
+    }
+	return &result
+}
+
 
 func main() {
 	godotenv.Load(".env")
 	
 	jiraTagName := os.Getenv("JIRA_TAG")
 	gitBranchName := os.Getenv("GIT_BRANCH_NAME")
+	gitMainBranchName := os.Getenv("MAIN_BRANCH")
 	completedTasksChannel := make(chan *[]string, 1)
 
 	// Make sure we trust the repo we wanna check
 	runcmd(fmt.Sprintf("git config --global --add safe.directory %s", os.Getenv("REPO_PATH")), true)
+	branches := [...]string{gitBranchName, gitMainBranchName}
+	prepareSources(branches)
 
 	//fmt.Printf("Connecting to Jira...\n")
 	client := connectToJira()
 
 	go searchForTasks(client, jiraTagName, completedTasksChannel)
-	missingCommits := checkMissingCommits(gitBranchName)
+	
+	missingCommits := checkMissingCommits(gitBranchName, gitMainBranchName)
 
 	//fmt.Printf("Getting data from Jira...\n\n")
 	completedTasks := <-completedTasksChannel
