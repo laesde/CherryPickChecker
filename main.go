@@ -129,7 +129,8 @@ func main() {
 	gitMainBranchName := os.Getenv("MAIN_BRANCH")
 	completedTasksChannel := make(chan *[]string, 1)
 
-	// Make sure we trust the repo we wanna check
+	fmt.Printf("repo path: %s\n", os.Getenv("REPO_PATH"))
+		// Make sure we trust the repo we wanna check
 	runcmd(fmt.Sprintf("git config --global --add safe.directory %s", os.Getenv("REPO_PATH")), true)
 	branches := [...]string{gitBranchName, gitMainBranchName}
 	prepareSources(branches)
@@ -151,7 +152,7 @@ func main() {
 	for _, e := range *missingCommits {
 
 		if _, prs := testSet[e]; prs {
-			panic("Duplicated ID in missing commits - This should not happen")		
+			// panic("Duplicated ID in missing commits - This should not happen")		
 		}
 
 		testSet[e] = true
