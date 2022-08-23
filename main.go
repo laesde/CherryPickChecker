@@ -59,7 +59,7 @@ func runJQLQuery(client *jira.Client, jquQuery string) (*[]string) {
 func searchForTasks(client *jira.Client, fixVersion string, result chan *[]string) {
 	result <- runJQLQuery(
 		client, 
-		fmt.Sprintf(os.Getenv("JQL_QUERY"), os.Getenv("JIRA_PROJECT_ID"), fixVersion, strings.ReplaceAll(fixVersion, " ", "_")))
+		fmt.Sprintf(os.Getenv("JQL_QUERY"), os.Getenv("JIRA_PROJECT_ID"), fixVersion))
 }
 
 // returns set of ticket that headBranch has but upstreamBranch doesn't
