@@ -24,8 +24,8 @@ Detecting missing tasks for version tve_9.5...
 To generate jira token check the website below:
 https://id.atlassian.com/manage-profile/security/api-tokens
 
-Configure jira token in JIRA_TOKEN env.
-do JIRA_USER adres email konta
+JIRA_TOKEN - jira token
+JIRA_USER - email of account that created the token
 
 # Configuration
 Put all configuration into the .env file
