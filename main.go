@@ -102,7 +102,7 @@ func contains(s []string, str string) bool {
 
 func prepareSources(sources [2]string) {
 	for _, source := range sources {
-		makeSureMainBranchIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s:%s", os.Getenv("REPO_PATH"), source, source)
+		makeSureMainBranchIsThereCommand := fmt.Sprintf("git -C %s fetch origin %s", os.Getenv("REPO_PATH"), source)
 		runcmdIgnoreErrors(makeSureMainBranchIsThereCommand, true)
 	}
 }
