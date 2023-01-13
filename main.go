@@ -66,7 +66,7 @@ func searchForTasks(client *jira.Client, fixVersion string, result chan *[]strin
 func diffJiraTicketsBetween(upstreamBranch string, headBranch string) (*[]string) {
 	var missingCommitsList []string
 
-	command := fmt.Sprintf("git -C %s log --format=%q %s..%s", os.Getenv("REPO_PATH"), "%s", upstreamBranch, headBranch)
+	command := fmt.Sprintf("git -C %s log --format=%q origin/%s..origin/%s", os.Getenv("REPO_PATH"), "%s", upstreamBranch, headBranch)
 	result := runcmd(command, true)
 
 	resultString := bytes.NewBuffer(result).String()
